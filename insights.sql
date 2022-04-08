@@ -1,71 +1,50 @@
 BEGIN;
 
+DROP TABLE IF EXISTS Client;
 CREATE TABLE "Client" (
-  "ID" SERIAL,
+  "ID" SERIAL PRIMARY KEY,
   "name" VARCHAR NOT NULL,
-  "age" INTEGER,
+  "age" INTEGER CHECK (age > 0),
   "gender" VARCHAR,
   "occupation" VARCHAR,
   "nationality" VARCHAR
 );
 
+DROP TABLE IF EXISTS restaurant_dishes;
 CREATE TABLE "restaurant_dishes" (
-  "INTEGER" <type>,
-  "FK" <type>,
-  "FK" <type>
+  "ID" SERIAL PRIMARY KEY,
+  "restaurant_id" INTEGER NOT NULL REFERENCES restaurant(ID),
+  "dish_id" INTEGER NOT NULL REFERENCES dish(ID)
 );
 
-CREATE INDEX "ID" ON  "restaurant_dishes" ("INTEGER");
-
-CREATE INDEX "restaurant_id" ON  "restaurant_dishes" ("FK");
-
-CREATE INDEX "dish_id" ON  "restaurant_dishes" ("FK");
-
+DROP TABLE IF EXISTS restaurant;
 CREATE TABLE "restaurant" (
-  "ID" INTEGER,
-  "name" VARCHAR,
+  "ID" SERIAL PRIMARY KEY,
+  "name" VARCHAR NOT NULL,
   "category" VARCHAR,
   "city" VARCHAR,
-  "address" VARCHAR,
-  CONSTRAINT "FK_restaurant.ID"
-    FOREIGN KEY ("ID")
-      REFERENCES "restaurant_dishes"("FK")
+  "address" VARCHAR
 );
 
+DROP TABLE IF EXISTS dish;
 CREATE TABLE "dish" (
-  "ID" INTEGER,
+  "ID" SERIAL PRIMARY KEY,
   "name" VARCHAR,
-  "price" INTEGER,
-  CONSTRAINT "FK_dish.ID"
-    FOREIGN KEY ("ID")
-      REFERENCES "restaurant_dishes"("FK")
+  "price" INTEGER CHECK (price > 0)
 );
 
+DROP TABLE IF EXISTS Visit_date;
 CREATE TABLE "Visit_date" (
-  "ID" INTEGER,
+  "ID" SERIAL PRIMARY KEY,
   "date" DATE,
-  "client_id" FK,
-  CONSTRAINT "FK_Visit_date.client_id"
-    FOREIGN KEY ("client_id")
-      REFERENCES "Client"("ID")
+  "client_id" INTEGER NOT NULL REFERENCES client(ID)
 );
 
+DROP TABLE IF EXISTS Rest_clients;
 CREATE TABLE "Rest_clients" (
-  "INTEGER" <type>,
-  "FK" <type>,
-  "FK" <type>,
-  CONSTRAINT "FK_Rest_clients.FK"
-    FOREIGN KEY ("FK")
-      REFERENCES "Client"("ID"),
-  CONSTRAINT "FK_Rest_clients.FK"
-    FOREIGN KEY ("FK")
-      REFERENCES "restaurant"("ID")
+  "ID" SERIAL PRIMARY KEY,
+  "clien_id" INTEGER NOT NULL REFERENCES client(ID),
+  "restaurant_id" INTEGER NOT NULL REFERENCES restaurant(ID)
 );
-
-CREATE INDEX "ID" ON  "Rest_clients" ("INTEGER");
-
-CREATE INDEX "client_id" ON  "Rest_clients" ("FK");
-
-CREATE INDEX "restaurant_ID" ON  "Rest_clients" ("FK");
 
 COMMIT;

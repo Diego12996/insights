@@ -27,7 +27,7 @@ GEM
 
 PLATFORMS
   x86_64-linux
-
+  
 DEPENDENCIES
   pg
   rubocop

@@ -12,20 +12,25 @@ class InsightsApp
     print "> "
     option, param = gets.chomp.split
 
-    case option
-    when "1" then search_by
-    when "2" then unique_dish
-    when "3" then users_by
-    when "4" then top10_by_visitors
-    when "5" then top10_by_sales
-    when "6" then top10_by_average_expense
-    when "7" then average_expense_by
-    when "8" then sales_per_month
-    when "9" then best_price_dish
-    when "10" then favorite_dish_by
-    when "quit" then print "Good bye!"
-    when "menu" then menu        
+    until option == "quit"
+      case option
+      when "1" then search_by(param)
+      when "2" then unique_dish
+      when "3" then users_by(param)
+      when "4" then top10_by_visitors
+      when "5" then top10_by_sales
+      when "6" then top10_by_average_expense
+      when "7" then average_expense_by(param)
+      when "8" then sales_per_month(param)
+      when "9" then best_price_dish
+      when "10" then favorite_dish_by(param)
+      when "menu" then menu        
+      end
+      print "> "
+      option, param = gets.chomp.split
     end
+
+
 
   end
 
@@ -49,33 +54,68 @@ class InsightsApp
   end
 
   def search_by
+
+
+    table = Terminal::Table.new
+    table.title = "List of restaurants"
+
   end
 
   def unique_dish
+
+
+    table = Terminal::Table.new
+    table.title = "List of dishes"
+
   end
 
   def users_by
+
+    table = Terminal::Table.new
+    table.title = "Number and Distribution of Users"
   end
 
   def top10_by_visitors
+
+
+    table = Terminal::Table.new
+    table.title = "Top 10 restaurants by visitors"
   end
 
   def top10_by_sales
+
+    table = Terminal::Table.new
+    table.title = "Top 10 restaurants by sales"
   end
 
   def top10_by_average_expense
+
+    table = Terminal::Table.new
+    table.title = "Top 10 restaurants by average expense per user"
   end
 
   def average_expense_by
+
+    table = Terminal::Table.new
+    table.title = "Average consumer expenses"
   end
 
   def sales_per_month
+
+    table = Terminal::Table.new
+    table.title = "Total sales by month"
   end
 
   def best_price_dish
+
+    table = Terminal::Table.new
+    table.title = "Best price for dish"
   end
 
   def favorite_dish_by
+
+    table = Terminal::Table.new
+    table.title = "Favorite dish"
   end
 
 

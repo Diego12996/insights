@@ -30,31 +30,37 @@ CSV.foreach("data.csv", headers: true) do |row|
       "occupation" => row["occupation"],
       "nationality" => row["nationality"]
     }
-    insert("client", client_data, "name")
+    client = insert("client", client_data, "name")
   
-    # publisher_data = {
-    #   "name" => row["publisher_name"],
-    #   "annual_revenue" => row["publisher_annual_revenue"],
-    #   "founded_year" => row["publisher_founded_year"]
-    # }
-    # publisher = insert("publishers", publisher_data, "name")
+    restaurant_data = {
+      "name" => row["restaurant_name"],
+      "category" => row["category"],
+      "city" => row["city"],
+      "address" => row["address"]
+    }
+    restaurant = insert("restaurant", restaurant_data, "name")
   
-    # genre_data = {
-    #   "name" => row["genre"]
-    # }
-    # genre = insert("genres", genre_data, "name")
+    dish_data = {
+      "name" => row["dish"],
+      "price" => row["price"]
+    }
+    dish = insert("dish", dish_data, "name")
   
-    # book_data = {
-    #   "title" => row["title"],
-    #   "pages" => row["pages"],
-    #   "author_id" => author["id"],
-    #   "publisher_id" => publisher["id"]
-    # }
-    # book = insert("books", book_data, "title")
+    visit_date_data = {
+      "date" => row["visit_date"],
+      "client_id" => client["id"]
+    }
+    insert("visit_date", visit_date_data)
   
-    # book_genre_data = {
-    #   "book_id" => book["id"],
-    #   "genre_id" => genre["id"]
-    # }
-    # insert("books_genres", book_genre_data)
+    rest_clients_data = {
+        "client_id" => client["id"],
+        "restaurant_id" => restaurant["id"]
+      }
+    insert("rest_clients", rest_clients_data)
+
+    restaurant_dishes_data = {
+      "restaurant_id" => restaurant["id"],
+      "dish_id" => dish["id"]
+    }
+    insert("restaurant_dishes", restaurant_dishes_data)
 end

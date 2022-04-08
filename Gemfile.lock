@@ -26,12 +26,12 @@ GEM
     unicode-display_width (2.1.0)
 
 PLATFORMS
-  ruby
-
+  x86_64-linux
+  
 DEPENDENCIES
   pg
   rubocop
   terminal-table
 
 BUNDLED WITH
-   2.1.4
+   2.3.7

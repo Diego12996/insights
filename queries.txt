@@ -1,1 +1,12 @@
-2 =  SELECT name FROM dish ORDER BY name;
+2 =  
+     SELECT name FROM dish 
+     ORDER BY name;
+
+4 =
+    SELECT r.name, count(rc.client_id) as visitors
+    FROM restaurant as r
+    JOIN rest_clients as rc on r.id = rc.restaurant_id  
+    group by r.name 
+    order by visitors DESC
+    LIMIT 10;
+   

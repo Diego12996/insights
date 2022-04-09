@@ -1,5 +1,6 @@
 require "pg"
 require"terminal-table"
+require "colorize"
 
 
 class InsightsApp
@@ -57,7 +58,7 @@ class InsightsApp
           restaurant.name, 
           restaurant.category, 
           restaurant.city
-        FROM restaurant])
+          FROM restaurant])
     else
       column_ref = {
         "category" => "restaurant.category",
@@ -82,14 +83,25 @@ class InsightsApp
     table.title = "List of restaurants"
     table.headings = result.fields
     table.rows = result.values
+    table.style = { border: :unicode }
     puts table
   end
 
   def unique_dish
 
+    result = @db.exec(%[
+      SELECT 
+        dish.name 
+        FROM dish
+        ORDER BY dish.name])
+
 
     table = Terminal::Table.new
     table.title = "List of dishes"
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
 
   end
 

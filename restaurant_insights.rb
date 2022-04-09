@@ -100,10 +100,34 @@ class InsightsApp
     puts table
   end
 
-  def users_by(_param)
+  def users_by(param)
+    column_ref = {
+      "age" => "client.age",
+      "gender" => "client.gender",
+      "occupation" => "client.occupation",
+      "nationality" => "client.nationality"
+    }
+
+    column, value = param.split("=")
+    order_by = value
+    value = column_ref[value]
+
+    result = @db.exec(%[
+      SELECT
+        #{value},
+        COUNT(#{value}),
+        CONCAT((COUNT(#{value})*100 / (SELECT COUNT(#{value}) FROM client)), '%') AS "percentage"
+      FROM client
+      GROUP BY #{value}
+      ORDER BY #{order_by} ASC;
+    ])
+
     table = Terminal::Table.new
     table.title = "Number and Distribution of Users"
-    table
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
   end
 
   def top10_by_visitors

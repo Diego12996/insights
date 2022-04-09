@@ -1,13 +1,12 @@
 require "pg"
-require"terminal-table"
+require "terminal-table"
 require "colorize"
-
 
 class InsightsApp
   def initialize
     @db = PG.connect(dbname: "insights")
   end
-  
+
   def start
     puts "Welcome to the Restaurants Insights!"
     puts "Write 'menu' at any moment to print the menu again and 'quit' to exit."
@@ -27,7 +26,7 @@ class InsightsApp
       when "8" then sales_per_month(param)
       when "9" then best_price_dish
       when "10" then favorite_dish_by(param)
-      when "menu" then menu        
+      when "menu" then menu
       end
       print "> "
       option, param = gets.chomp.split
@@ -51,23 +50,22 @@ class InsightsApp
   end
 
   def search_by(param)
-
     if param.nil?
-      result = @db.exec(%[
-        SELECT 
-          restaurant.name, 
-          restaurant.category, 
+      result = @db.exec(%(
+        SELECT
+          restaurant.name,
+          restaurant.category,
           restaurant.city
-          FROM restaurant])
+          FROM restaurant))
     else
       column_ref = {
         "category" => "restaurant.category",
         "city" => "restaurant.city"
       }
-  
+
       column, value = param.split("=")
       column = column_ref[column]
-  
+
       result = @db.exec(%[
         SELECT
           restaurant.name,
@@ -88,13 +86,11 @@ class InsightsApp
   end
 
   def unique_dish
-
-    result = @db.exec(%[
-      SELECT 
-        dish.name 
+    result = @db.exec(%(
+      SELECT
+        dish.name
         FROM dish
-        ORDER BY dish.name])
-
+        ORDER BY dish.name))
 
     table = Terminal::Table.new
     table.title = "List of dishes"
@@ -102,59 +98,55 @@ class InsightsApp
     table.rows = result.values
     table.style = { border: :unicode }
     puts table
-
   end
 
-  def users_by(param)
-
+  def users_by(_param)
     table = Terminal::Table.new
     table.title = "Number and Distribution of Users"
+    table
   end
 
   def top10_by_visitors
-
-
     table = Terminal::Table.new
     table.title = "Top 10 restaurants by visitors"
+    table
   end
 
   def top10_by_sales
-
     table = Terminal::Table.new
     table.title = "Top 10 restaurants by sales"
+    table
   end
 
   def top10_by_average_expense
-
     table = Terminal::Table.new
     table.title = "Top 10 restaurants by average expense per user"
+    table
   end
 
-  def average_expense_by(param)
-
+  def average_expense_by(_param)
     table = Terminal::Table.new
     table.title = "Average consumer expenses"
+    table
   end
 
-  def sales_per_month(param)
-
+  def sales_per_month(_param)
     table = Terminal::Table.new
     table.title = "Total sales by month"
+    table
   end
 
   def best_price_dish
-
     table = Terminal::Table.new
     table.title = "Best price for dish"
+    table
   end
 
-  def favorite_dish_by(param)
-
+  def favorite_dish_by(_param)
     table = Terminal::Table.new
     table.title = "Favorite dish"
+    table
   end
-
-
 end
 
 app = InsightsApp.new

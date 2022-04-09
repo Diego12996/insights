@@ -3,7 +3,9 @@ require"terminal-table"
 
 
 class InsightsApp
-  def initialize; end
+  def initialize
+    @db = PG.connect(dbname: "insights")
+  end
   
   def start
     puts "Welcome to the Restaurants Insights!"
@@ -29,12 +31,6 @@ class InsightsApp
       print "> "
       option, param = gets.chomp.split
     end
-
-
-
-  end
-
-  def options
   end
 
   def menu
@@ -53,12 +49,36 @@ class InsightsApp
     puts "Pick a number from the list and an [option] if necessary"
   end
 
-  def search_by
+  def search_by(param)
 
+    if param == ""
+      SELECT name, category, city
+      FROM restaurant
+    else
+      column_ref = {
+        "category" => "restaurant.category",
+        "city" => "restaurant.city"
+      }
+  
+      column, value = param.split("=")
+      column = column_ref[column]
+  
+      result = @db.exec(%[
+        SELECT
+          restaurant.name,
+          restaurant.category,
+          restaurant.city
+        FROM
+          restaurant
+        WHERE LOWER(#{column}) LIKE LOWER('%#{value}%');
+      ])
+    end
 
     table = Terminal::Table.new
     table.title = "List of restaurants"
-
+    table.headings = result.fields
+    table.rows = result.values
+    puts table
   end
 
   def unique_dish
@@ -69,7 +89,7 @@ class InsightsApp
 
   end
 
-  def users_by
+  def users_by(param)
 
     table = Terminal::Table.new
     table.title = "Number and Distribution of Users"
@@ -94,13 +114,13 @@ class InsightsApp
     table.title = "Top 10 restaurants by average expense per user"
   end
 
-  def average_expense_by
+  def average_expense_by(param)
 
     table = Terminal::Table.new
     table.title = "Average consumer expenses"
   end
 
-  def sales_per_month
+  def sales_per_month(param)
 
     table = Terminal::Table.new
     table.title = "Total sales by month"
@@ -112,7 +132,7 @@ class InsightsApp
     table.title = "Best price for dish"
   end
 
-  def favorite_dish_by
+  def favorite_dish_by(param)
 
     table = Terminal::Table.new
     table.title = "Favorite dish"

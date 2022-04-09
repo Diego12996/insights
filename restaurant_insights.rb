@@ -107,9 +107,22 @@ class InsightsApp
   end
 
   def top10_by_visitors
+    
+    result = @db.exec(%(
+      SELECT
+      r.name, count(rc.client_id) as visitors
+      FROM restaurant as r
+      JOIN rest_clients as rc on r.id = rc.restaurant_id
+      GROUP BY r.name 
+      ORDER BY visitors DESC
+      LIMIT 10))
+
     table = Terminal::Table.new
     table.title = "Top 10 restaurants by visitors"
-    table
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
   end
 
   def top10_by_sales

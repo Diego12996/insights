@@ -22,13 +22,13 @@ CREATE TABLE restaurant (
 DROP TABLE IF EXISTS dish;
 CREATE TABLE dish (
   ID SERIAL PRIMARY KEY,
-  name VARCHAR,
-  price INTEGER CHECK (price > 0)
+  name VARCHAR
 );
 
 DROP TABLE IF EXISTS restaurant_dishes;
 CREATE TABLE restaurant_dishes (
   ID SERIAL PRIMARY KEY,
+  price INTEGER CHECK (price > 0),
   restaurant_id INTEGER NOT NULL REFERENCES restaurant(ID),
   dish_id INTEGER NOT NULL REFERENCES dish(ID)
 );

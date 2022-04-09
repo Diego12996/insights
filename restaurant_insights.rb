@@ -126,6 +126,7 @@ class InsightsApp
   end
 
   def top10_by_sales
+    
     result = @db.exec(%(
       SELECT r.name, SUM(rd.price) AS sales
       FROM restaurant AS r 
@@ -143,9 +144,21 @@ class InsightsApp
   end
 
   def top10_by_average_expense
+    
+    result = @db.exec(%(
+      SELECT r.name, ROUND(AVG(rd.price),1) AS "avg expense"
+      FROM restaurant AS r 
+      JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
+      GROUP BY r.name
+      ORDER BY "avg expense" DESC
+      LIMIT 10))
+
     table = Terminal::Table.new
     table.title = "Top 10 restaurants by average expense per user"
-    table
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
   end
 
   def average_expense_by(_param)

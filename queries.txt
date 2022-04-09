@@ -18,3 +18,13 @@ JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
 GROUP BY r.name
 ORDER BY sales DESC
 LIMIT 10;
+
+6 = 
+
+SELECT r.name, ROUND(AVG(rd.price),1) AS "avg expense"
+FROM restaurant AS r 
+JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
+GROUP BY r.name
+ORDER BY "avg expense" DESC
+LIMIT 10;
+

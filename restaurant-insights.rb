@@ -51,9 +51,13 @@ class InsightsApp
 
   def search_by(param)
 
-    if param == ""
-      SELECT name, category, city
-      FROM restaurant
+    if param.nil?
+      result = @db.exec(%[
+        SELECT 
+          restaurant.name, 
+          restaurant.category, 
+          restaurant.city
+        FROM restaurant])
     else
       column_ref = {
         "category" => "restaurant.category",

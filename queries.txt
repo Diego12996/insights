@@ -10,3 +10,11 @@
     order by visitors DESC
     LIMIT 10;
    
+5 =   
+
+SELECT r.name, SUM(rd.price) AS sales
+FROM restaurant AS r 
+JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
+GROUP BY r.name
+ORDER BY sales DESC
+LIMIT 10;

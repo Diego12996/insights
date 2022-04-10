@@ -45,15 +45,10 @@ CSV.foreach("data.csv", headers: true) do |row|
   }
   dish = insert("dish", dish_data, "name")
 
-  visit_date_data = {
-    "date" => row["visit_date"],
-    "client_id" => client["id"]
-  }
-  insert("visit_date", visit_date_data)
-
   rest_clients_data = {
     "client_id" => client["id"],
-    "restaurant_id" => restaurant["id"]
+    "restaurant_id" => restaurant["id"],
+    "date" => row["visit_date"]
   }
   insert("rest_clients", rest_clients_data)
 

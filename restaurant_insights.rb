@@ -185,10 +185,36 @@ class InsightsApp
     puts table
   end
 
-  def average_expense_by(_param)
+  def average_expense_by(param)
+
+    column_ref = {
+      "age" => "client.age",
+      "gender" => "client.gender",
+      "occupation" => "client.occupation",
+      "nationality" => "client.nationality"
+    }
+
+    column, value = param.split("=")
+    value = column_ref[value]
+
+    result = @db.exec(%[
+      SELECT 
+        #{value},
+        ROUND(AVG(restaurant_dishes.price), 2) AS "average expense"
+      FROM client
+      JOIN rest_clients ON client.id = rest_clients.client_id
+      JOIN restaurant ON rest_clients.client_id =restaurant.id
+      JOIN restaurant_dishes ON restaurant.id = restaurant_dishes.restaurant_id
+      GROUP BY #{value}
+      ORDER BY "average expense" DESC;
+    ])
+
     table = Terminal::Table.new
     table.title = "Average consumer expenses"
-    table
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
   end
 
   def sales_per_month(_param)

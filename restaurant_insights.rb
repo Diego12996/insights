@@ -108,7 +108,7 @@ class InsightsApp
       "nationality" => "client.nationality"
     }
 
-    column, value = param.split("=")
+    _, value = param.split("=")
     order_by = value
     value = column_ref[value]
 
@@ -198,9 +198,21 @@ class InsightsApp
   end
 
   def best_price_dish
+    
+    result = @db.exec(%(
+      SELECT DISTINCT ON (d.name) d.name as dish, r.name, MIN(rd.price) as price
+      FROM dish AS d 
+      JOIN restaurant_dishes AS rd ON d.id = rd.dish_id
+      JOIN restaurant AS r on r.id = rd.restaurant_id
+      GROUP BY d.name, r.name
+      ORDER BY dish, price))
+
     table = Terminal::Table.new
     table.title = "Best price for dish"
-    table
+    table.headings = result.fields
+    table.rows = result.values
+    table.style = { border: :unicode }
+    puts table
   end
 
   def favorite_dish_by(_param)

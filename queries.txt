@@ -28,3 +28,11 @@ GROUP BY r.name
 ORDER BY "avg expense" DESC
 LIMIT 10;
 
+9 =
+
+SELECT DISTINCT ON (d.name) d.name as dish, r.name, MIN(rd.price) as price
+FROM dish AS d 
+JOIN restaurant_dishes AS rd ON d.id = rd.dish_id
+JOIN restaurant AS r on r.id = rd.restaurant_id
+GROUP BY d.name, r.name
+ORDER BY dish, price;

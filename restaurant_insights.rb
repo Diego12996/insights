@@ -10,45 +10,16 @@ class InsightsApp
   end
 
   def start
-    puts "Welcome to the Restaurants Insights!"
-    puts "Write 'menu' at any moment to print the menu again and 'quit' to exit."
+    welcome_message
     menu
     print "> "
     option, param = gets.chomp.split
 
     until option == "quit"
-      case option
-      when "1" then search_by(param)
-      when "2" then unique_dish
-      when "3" then users_by(param)
-      when "4" then top10_by_visitors
-      when "5" then top10_by_sales
-      when "6" then top10_by_average_expense
-      when "7" then average_expense_by(param)
-      when "8" then sales_per_month(param)
-      when "9" then best_price_dish
-      when "10" then favorite_dish_by(param)
-      when "menu" then menu
-      end
+      case_when(option, param)
       print "> "
       option, param = gets.chomp.split
     end
-  end
-
-  def menu
-    puts "---"
-    puts "1. List of restaurants included in the research filter by ['' | category=string | city=string]"
-    puts "2. List of unique dishes included in the research"
-    puts "3. Number and distribution (%) of clients by [group=[age | gender | occupation | nationality]]"
-    puts "4. Top 10 restaurants by the number of visitors."
-    puts "5. Top 10 restaurants by the sum of sales."
-    puts "6. Top 10 restaurants by the average expense of their clients."
-    puts "7. The average consumer expense group by [group=[age | gender | occupation | nationality]]"
-    puts "8. The total sales of all the restaurants group by month [order=[asc | desc]]"
-    puts "9. The list of dishes and the restaurant where you can find it at a lower price."
-    puts "10. The favorite dish for [age=number | gender=string | occupation=string | nationality=string]"
-    puts "---"
-    puts "Pick a number from the list and an [option] if necessary"
   end
 
   def search_by(param)
@@ -66,7 +37,7 @@ class InsightsApp
 
       result = @db.exec(%(
         SELECT name, category, city FROM restaurants
-        WHERE #{column} = '#{value.capitalize}';
+        WHERE LOWER(#{column}) LIKE LOWER('%#{value}%');
       ))
     end
 
@@ -82,13 +53,7 @@ class InsightsApp
   end
 
   def users_by(param)
-    column_ref = {
-      "age" => "clients.age",
-      "gender" => "clients.gender",
-      "occupation" => "clients.occupation",
-      "nationality" => "clients.nationality"
-    }
-
+    column_ref
     _, value = param.split("=")
     value = column_ref[value]
 
@@ -122,20 +87,15 @@ class InsightsApp
 
   def top10_by_average_expense
     result = @db.exec(%[
-      SELECT a.name, ROUND(AVG(price),1) AS avg_expense FROM restaurants AS a
+      SELECT a.name, ROUND(AVG(price),1) AS "avg expense" FROM restaurants AS a
       INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
-      GROUP BY a.name ORDER BY avg_expense DESC LIMIT 10;])
+      GROUP BY a.name ORDER BY "avg expense" DESC LIMIT 10;])
 
     table_printer("Top 10 restaurants by average expense per user", result)
   end
 
   def average_expense_by(param)
-    column_ref = {
-      "age" => "clients.age",
-      "gender" => "clients.gender",
-      "occupation" => "clients.occupation",
-      "nationality" => "clients.nationality"
-    }
+    column_ref
 
     _, value = param.split("=")
     value = column_ref[value]
@@ -174,12 +134,7 @@ class InsightsApp
   end
 
   def favorite_dish_by(param)
-    column_ref = {
-      "age" => "clients.age",
-      "gender" => "clients.gender",
-      "occupation" => "clients.occupation",
-      "nationality" => "clients.nationality"
-    }
+    column_ref
 
     column, value = param.split("=")
     column = column_ref[column]
@@ -189,7 +144,7 @@ class InsightsApp
       INNER JOIN restaurants_dishes b ON b.dish_id = a.id
       INNER JOIN visits c ON c.restaurant_dish_id = b.id
       INNER JOIN clients ON clients.id = c.client_id
-      WHERE #{column} = '#{value.capitalize}'
+      WHERE #{column} LIKE LOWER('%#{value}%')
       GROUP BY #{column}, dish
       ORDER BY count DESC LIMIT 1;
     ])

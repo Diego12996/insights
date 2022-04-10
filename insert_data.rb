@@ -30,7 +30,7 @@ CSV.foreach("data.csv", headers: true) do |row|
     "occupation" => row["occupation"],
     "nationality" => row["nationality"]
   }
-  client = insert("client", client_data, "name")
+  clients = insert("clients", client_data, "name")
 
   restaurant_data = {
     "name" => row["restaurant_name"],
@@ -38,24 +38,25 @@ CSV.foreach("data.csv", headers: true) do |row|
     "city" => row["city"],
     "address" => row["address"]
   }
-  restaurant = insert("restaurant", restaurant_data, "name")
-
+  restaurants = insert("restaurants", restaurant_data, "name")
+  
   dish_data = {
     "name" => row["dish"]
   }
-  dish = insert("dish", dish_data, "name")
-
-  rest_clients_data = {
-    "client_id" => client["id"],
-    "restaurant_id" => restaurant["id"],
-    "date" => row["visit_date"]
+  dishes = insert("dishes", dish_data, "name")
+  
+  restaurants_dishes_data = {
+    "restaurant_id" => restaurants["id"],
+    "dish_id" => dishes["id"],
+    "price" => row["price"]
   }
-  insert("rest_clients", rest_clients_data)
+  restaurants_dishes = insert("restaurants_dishes", restaurants_dishes_data)
 
-  restaurant_dishes_data = {
-    "price" => row["price"],
-    "restaurant_id" => restaurant["id"],
-    "dish_id" => dish["id"]
+  visits_data = {
+    "date" => row["visit_date"],
+    "client_id" => clients["id"],
+    "restaurant_dish_id" => restaurants_dishes["id"]
   }
-  insert("restaurant_dishes", restaurant_dishes_data)
+  insert("visits", visits_data)
+  
 end

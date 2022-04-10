@@ -1,8 +1,10 @@
 require "pg"
 require "terminal-table"
 require "colorize"
+require_relative "utilities"
 
 class InsightsApp
+  include Utilities
   def initialize
     @db = PG.connect(dbname: "insights")
   end
@@ -52,199 +54,153 @@ class InsightsApp
   def search_by(param)
     if param.nil?
       result = @db.exec(%(
-        SELECT
-          restaurant.name,
-          restaurant.category,
-          restaurant.city
-          FROM restaurant))
+        SELECT name, category, city FROM restaurants;))
     else
       column_ref = {
-        "category" => "restaurant.category",
-        "city" => "restaurant.city"
+        "category" => "restaurants.category",
+        "city" => "restaurants.city"
       }
 
       column, value = param.split("=")
       column = column_ref[column]
 
       result = @db.exec(%[
-        SELECT
-          restaurant.name,
-          restaurant.category,
-          restaurant.city
-        FROM
-          restaurant
-        WHERE LOWER(#{column}) LIKE LOWER('%#{value}%');
+        SELECT name, category, city FROM restaurants
+        WHERE #{column} = '#{value.capitalize}';
       ])
     end
 
-    table = Terminal::Table.new
-    table.title = "List of restaurants"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+    table_printer("List of restaurants", result)
   end
 
   def unique_dish
     result = @db.exec(%(
-      SELECT
-        dish.name
-        FROM dish
-        ORDER BY dish.name))
-
-    table = Terminal::Table.new
-    table.title = "List of dishes"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+      SELECT DISTINCT name
+      FROM dishes;))
+    
+    table_printer("List of dishes", result)
   end
 
   def users_by(param)
     column_ref = {
-      "age" => "client.age",
-      "gender" => "client.gender",
-      "occupation" => "client.occupation",
-      "nationality" => "client.nationality"
+      "age" => "clients.age",
+      "gender" => "clients.gender",
+      "occupation" => "clients.occupation",
+      "nationality" => "clients.nationality"
     }
 
     _, value = param.split("=")
-    order_by = value
     value = column_ref[value]
 
     result = @db.exec(%[
-      SELECT
-        #{value},
-        COUNT(#{value}),
-        CONCAT((COUNT(#{value})*100 / (SELECT COUNT(#{value}) FROM client)), '%') AS "percentage"
-      FROM client
-      GROUP BY #{value}
-      ORDER BY #{order_by} ASC;
+      SELECT #{value}, COUNT(*), ROUND( (COUNT(*)*100 /  SUM( COUNT(*) ) OVER() ),2) || '%' percentage FROM clients
+        GROUP BY #{value}
+        ORDER BY #{value};
     ])
 
-    table = Terminal::Table.new
-    table.title = "Number and Distribution of Users"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+    table_printer("Number and Distribution of Users", result)
   end
 
   def top10_by_visitors
     
     result = @db.exec(%(
-      SELECT
-      r.name, count(rc.client_id) as visitors
-      FROM restaurant as r
-      JOIN rest_clients as rc on r.id = rc.restaurant_id
-      GROUP BY r.name 
-      ORDER BY visitors DESC
-      LIMIT 10))
+      SELECT a.name, COUNT(*) as visitors FROM restaurants AS a
+        INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
+        INNER JOIN visits AS c ON c.restaurant_dish_id = b.id
+        GROUP BY a.name ORDER BY visitors DESC LIMIT 10;))
 
-    table = Terminal::Table.new
-    table.title = "Top 10 restaurants by visitors"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+    table_printer("Top 10 restaurants by visitors", result)
   end
 
   def top10_by_sales
     
     result = @db.exec(%(
-      SELECT r.name, SUM(rd.price) AS sales
-      FROM restaurant AS r 
-      JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
-      GROUP BY r.name
-      ORDER BY sales DESC
-      LIMIT 10))
-
-    table = Terminal::Table.new
-    table.title = "Top 10 restaurants by sales"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+      SELECT a.name, SUM(price) AS sales FROM restaurants AS a
+      INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
+      GROUP BY a.name ORDER BY sales DESC LIMIT 10;))
+    
+    table_printer("Top 10 restaurants by sales", result)
   end
 
   def top10_by_average_expense
     
-    result = @db.exec(%(
-      SELECT r.name, ROUND(AVG(rd.price),1) AS "avg expense"
-      FROM restaurant AS r 
-      JOIN restaurant_dishes AS rd ON r.id = rd.restaurant_id
-      GROUP BY r.name
-      ORDER BY "avg expense" DESC
-      LIMIT 10))
-
-    table = Terminal::Table.new
-    table.title = "Top 10 restaurants by average expense per user"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+    result = @db.exec(%[
+      SELECT a.name, ROUND(AVG(price),1) AS avg_expense FROM restaurants AS a
+      INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
+      GROUP BY a.name ORDER BY avg_expense DESC LIMIT 10;])
+    
+    table_printer("Top 10 restaurants by average expense per user", result)
   end
 
   def average_expense_by(param)
 
     column_ref = {
-      "age" => "client.age",
-      "gender" => "client.gender",
-      "occupation" => "client.occupation",
-      "nationality" => "client.nationality"
+      "age" => "clients.age",
+      "gender" => "clients.gender",
+      "occupation" => "clients.occupation",
+      "nationality" => "clients.nationality"
     }
 
-    column, value = param.split("=")
+    _, value = param.split("=")
     value = column_ref[value]
 
     result = @db.exec(%[
-      SELECT 
-        #{value},
-        ROUND(AVG(restaurant_dishes.price), 2) AS "average expense"
-      FROM client
-      JOIN rest_clients ON client.id = rest_clients.client_id
-      JOIN restaurant ON rest_clients.client_id =restaurant.id
-      JOIN restaurant_dishes ON restaurant.id = restaurant_dishes.restaurant_id
-      GROUP BY #{value}
-      ORDER BY "average expense" DESC;
+      SELECT #{value}, ROUND(AVG(rd.price),1) AS avg_expense FROM clients
+      JOIN visits AS v ON clients.id = v.client_id
+      JOIN restaurants_dishes AS rd ON v.restaurant_dish_id = rd.id
+      GROUP BY #{value} ORDER BY avg_expense;
     ])
 
-    table = Terminal::Table.new
-    table.title = "Average consumer expenses"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+    table_printer("Average consumer expenses", result)
   end
 
-  def sales_per_month(_param)
-    table = Terminal::Table.new
-    table.title = "Total sales by month"
-    table
+  def sales_per_month(param)
+    _, value = param.split("=")
+
+    result = @db.exec(%[
+      SELECT to_char(v.date,'Mon') AS month, SUM(rd.price) AS sales  FROM visits AS v
+      JOIN restaurants_dishes AS rd ON v.restaurant_dish_id = rd.id
+      GROUP BY month ORDER BY sales #{value};
+    ])
+
+    table_printer("Total sales by month", result)
   end
 
   def best_price_dish
     
     result = @db.exec(%(
       SELECT DISTINCT ON (d.name) d.name as dish, r.name, MIN(rd.price) as price
-      FROM dish AS d 
-      JOIN restaurant_dishes AS rd ON d.id = rd.dish_id
-      JOIN restaurant AS r on r.id = rd.restaurant_id
-      GROUP BY d.name, r.name
-      ORDER BY dish, price))
-
-    table = Terminal::Table.new
-    table.title = "Best price for dish"
-    table.headings = result.fields
-    table.rows = result.values
-    table.style = { border: :unicode }
-    puts table
+      FROM dishes AS d
+      JOIN restaurants_dishes AS rd ON d.id = rd.dish_id
+      JOIN restaurants AS r on r.id = rd.restaurant_id
+      GROUP BY d.name, r.name ORDER BY dish, price;))
+    
+    table_printer("Best price for dish", result)
   end
 
-  def favorite_dish_by(_param)
-    table = Terminal::Table.new
-    table.title = "Favorite dish"
-    table
+  def favorite_dish_by(param)
+    
+    column_ref = {
+      "age" => "clients.age",
+      "gender" => "clients.gender",
+      "occupation" => "clients.occupation",
+      "nationality" => "clients.nationality"
+    }
+
+    column, value = param.split("=")
+    column = column_ref[column]
+
+    result = @db.exec(%[
+      SELECT #{column}, a.name as dish, COUNT(a.name) count FROM dishes a
+      INNER JOIN restaurants_dishes b ON b.dish_id = a.id
+      INNER JOIN visits c ON c.restaurant_dish_id = b.id
+      INNER JOIN clients ON clients.id = c.client_id
+      WHERE #{column} = '#{value.capitalize}'
+      GROUP BY #{column}, dish
+      ORDER BY count DESC LIMIT 1;
+    ])
+
+    table_printer("Average consumer expenses", result)
   end
 end
 

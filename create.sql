@@ -1,44 +1,44 @@
 BEGIN;
 
-DROP TABLE IF EXISTS client;
-CREATE TABLE client (
-  ID SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  age INTEGER CHECK (age > 0),
-  gender VARCHAR,
-  occupation VARCHAR,
-  nationality VARCHAR
+DROP TABLE IF EXISTS "clients";
+CREATE TABLE "clients" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR NOT NULL,
+  "age" INTEGER NOT NULL,
+  "gender" VARCHAR NOT NULL check ("gender" = 'Male' or "gender" = 'Female'),   
+  "occupation" VARCHAR NOT NULL,
+  "nationality" VARCHAR NOT NULL
 );
 
-DROP TABLE IF EXISTS restaurant;
-CREATE TABLE restaurant (
-  ID SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  category VARCHAR,
-  city VARCHAR,
-  address VARCHAR
+DROP TABLE IF EXISTS "dishes";
+CREATE TABLE "dishes" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR NOT NULL
 );
 
-DROP TABLE IF EXISTS dish;
-CREATE TABLE dish (
-  ID SERIAL PRIMARY KEY,
-  name VARCHAR
+DROP TABLE IF EXISTS "restaurants";
+CREATE TABLE "restaurants" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR NOT NULL,
+  "category" VARCHAR NOT NULL,
+  "city" VARCHAR NOT NULL,
+  "address" VARCHAR NOT NULL
 );
 
-DROP TABLE IF EXISTS restaurant_dishes;
-CREATE TABLE restaurant_dishes (
-  ID SERIAL PRIMARY KEY,
-  price INTEGER CHECK (price > 0),
-  restaurant_id INTEGER NOT NULL REFERENCES restaurant(ID),
-  dish_id INTEGER NOT NULL REFERENCES dish(ID)
+DROP TABLE IF EXISTS "restaurants_dishes";
+CREATE TABLE "restaurants_dishes" (
+  "id" SERIAL PRIMARY KEY,
+  "restaurant_id" INTEGER NOT NULL REFERENCES "restaurants"("id"),
+  "dish_id" INTEGER NOT NULL REFERENCES "dishes"("id"),
+  "price" INTEGER NOT NULL
 );
 
-DROP TABLE IF EXISTS rest_clients;
-CREATE TABLE rest_clients (
-  ID SERIAL PRIMARY KEY,
-  client_id INTEGER NOT NULL REFERENCES client(ID),
-  restaurant_id INTEGER NOT NULL REFERENCES restaurant(ID),
-  date DATE
+DROP TABLE IF EXISTS "visits";
+CREATE TABLE "visits" (
+  "id" SERIAL PRIMARY KEY,
+  "date" DATE NOT NULL,
+  "client_id" INTEGER NOT NULL REFERENCES "clients"("id"),
+  "restaurant_dish_id" INTEGER NOT NULL REFERENCES "restaurants_dishes"("id")
 );
 
 COMMIT;

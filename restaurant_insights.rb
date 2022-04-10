@@ -64,10 +64,10 @@ class InsightsApp
       column, value = param.split("=")
       column = column_ref[column]
 
-      result = @db.exec(%[
+      result = @db.exec(%(
         SELECT name, category, city FROM restaurants
         WHERE #{column} = '#{value.capitalize}';
-      ])
+      ))
     end
 
     table_printer("List of restaurants", result)
@@ -77,7 +77,7 @@ class InsightsApp
     result = @db.exec(%(
       SELECT DISTINCT name
       FROM dishes;))
-    
+
     table_printer("List of dishes", result)
   end
 
@@ -102,7 +102,6 @@ class InsightsApp
   end
 
   def top10_by_visitors
-    
     result = @db.exec(%(
       SELECT a.name, COUNT(*) as visitors FROM restaurants AS a
         INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
@@ -113,27 +112,24 @@ class InsightsApp
   end
 
   def top10_by_sales
-    
     result = @db.exec(%(
       SELECT a.name, SUM(price) AS sales FROM restaurants AS a
       INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
       GROUP BY a.name ORDER BY sales DESC LIMIT 10;))
-    
+
     table_printer("Top 10 restaurants by sales", result)
   end
 
   def top10_by_average_expense
-    
     result = @db.exec(%[
       SELECT a.name, ROUND(AVG(price),1) AS avg_expense FROM restaurants AS a
       INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
       GROUP BY a.name ORDER BY avg_expense DESC LIMIT 10;])
-    
+
     table_printer("Top 10 restaurants by average expense per user", result)
   end
 
   def average_expense_by(param)
-
     column_ref = {
       "age" => "clients.age",
       "gender" => "clients.gender",
@@ -167,19 +163,17 @@ class InsightsApp
   end
 
   def best_price_dish
-    
     result = @db.exec(%(
       SELECT DISTINCT ON (d.name) d.name as dish, r.name, MIN(rd.price) as price
       FROM dishes AS d
       JOIN restaurants_dishes AS rd ON d.id = rd.dish_id
       JOIN restaurants AS r on r.id = rd.restaurant_id
       GROUP BY d.name, r.name ORDER BY dish, price;))
-    
+
     table_printer("Best price for dish", result)
   end
 
   def favorite_dish_by(param)
-    
     column_ref = {
       "age" => "clients.age",
       "gender" => "clients.gender",

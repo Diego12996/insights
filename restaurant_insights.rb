@@ -12,12 +12,12 @@ class InsightsApp
   def start
     welcome_message
     menu
-    print "> "
+    print "> ".yellow
     option, param = gets.chomp.split
 
     until option == "quit"
       case_when(option, param)
-      print "> "
+      print "> ".yellow
       option, param = gets.chomp.split
     end
   end
@@ -41,7 +41,7 @@ class InsightsApp
       ))
     end
 
-    table_printer("List of restaurants", result)
+    table_printer("List of restaurants".yellow, result)
   end
 
   def unique_dish
@@ -49,10 +49,15 @@ class InsightsApp
       SELECT DISTINCT name
       FROM dishes;))
 
-    table_printer("List of dishes", result)
+    table_printer("List of dishes".yellow, result)
   end
 
   def users_by(param)
+    if param.nil?
+      error_msg("group=[age | gender | occupation | nationality]")
+      param = gets.chomp
+    end
+
     column_ref
     _, value = param.split("=")
     value = column_ref[value]
@@ -62,8 +67,7 @@ class InsightsApp
         GROUP BY #{value}
         ORDER BY #{value};
     ])
-
-    table_printer("Number and Distribution of Users", result)
+    table_printer("Number and Distribution of Users".yellow, result)
   end
 
   def top10_by_visitors
@@ -73,7 +77,7 @@ class InsightsApp
         INNER JOIN visits AS c ON c.restaurant_dish_id = b.id
         GROUP BY a.name ORDER BY visitors DESC LIMIT 10;))
 
-    table_printer("Top 10 restaurants by visitors", result)
+    table_printer("Top 10 restaurants by visitors".yellow, result)
   end
 
   def top10_by_sales
@@ -82,7 +86,7 @@ class InsightsApp
       INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
       GROUP BY a.name ORDER BY sales DESC LIMIT 10;))
 
-    table_printer("Top 10 restaurants by sales", result)
+    table_printer("Top 10 restaurants by sales".yellow, result)
   end
 
   def top10_by_average_expense
@@ -91,10 +95,14 @@ class InsightsApp
       INNER JOIN restaurants_dishes AS b ON b.restaurant_id = a.id
       GROUP BY a.name ORDER BY "avg expense" DESC LIMIT 10;])
 
-    table_printer("Top 10 restaurants by average expense per user", result)
+    table_printer("Top 10 restaurants by average expense per user".yellow, result)
   end
 
   def average_expense_by(param)
+    if param.nil?
+      error_msg("group=[age | gender | occupation | nationality]")
+      param = gets.chomp
+    end
     column_ref
 
     _, value = param.split("=")
@@ -107,10 +115,14 @@ class InsightsApp
       GROUP BY #{value} ORDER BY avg_expense;
     ])
 
-    table_printer("Average consumer expenses", result)
+    table_printer("Average consumer expenses".yellow, result)
   end
 
   def sales_per_month(param)
+    if param.nil?
+      error_msg("order=[asc | desc]")
+      param = gets.chomp
+    end
     _, value = param.split("=")
 
     result = @db.exec(%[
@@ -119,7 +131,7 @@ class InsightsApp
       GROUP BY month ORDER BY sales #{value};
     ])
 
-    table_printer("Total sales by month", result)
+    table_printer("Total sales by month".yellow, result)
   end
 
   def best_price_dish
@@ -130,10 +142,14 @@ class InsightsApp
       JOIN restaurants AS r on r.id = rd.restaurant_id
       GROUP BY d.name, r.name ORDER BY dish, price;))
 
-    table_printer("Best price for dish", result)
+    table_printer("Best price for dish".yellow, result)
   end
 
   def favorite_dish_by(param)
+    if param.nil?
+      error_msg("age=number | gender=string | occupation=string | nationality=string]")
+      param = gets.chomp
+    end
     column_ref
 
     column, value = param.split("=")
@@ -149,7 +165,7 @@ class InsightsApp
       ORDER BY count DESC LIMIT 1;
     ])
 
-    table_printer("Average consumer expenses", result)
+    table_printer("Average consumer expenses".yellow, result)
   end
 end
 

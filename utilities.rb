@@ -54,14 +54,8 @@ module Utilities
     end
   end
 
-  # def for validate option param = option insert for user
-  def validation_param(param, left, right)
-    izq, der = param.split("=")
-    left.include?(izq) && (right.include?(der) || right.empty?) ? [izq, der] : []
-  end
-
-  # error msg if user insert invalid option prompt = suggestion input
   def error_msg(prompt)
-    puts "Please insert a valid option like #{prompt}".red
+    puts "Paramater can't be blank please insert an option #{prompt}".red
+    print "> ".yellow
   end
 end
